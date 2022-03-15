@@ -1,30 +1,5 @@
 // const data = {...};
 
-function dragHandler() {
-    const drag = d3.drag();
-
-    function onStart(e, d) {
-        console.log("start", e, " d: ", d, "parent", d3.select(this.parentNode))
-    }
-
-    function onDrag(e, d) {
-        console.log("drag", e, " d: ", d)
-        d3
-            .select(this)
-            .attr("transform", `translate(${e.x - d.x}, ${e.y - d.y})`)
-    }
-
-    function onDrop(e, d) {
-        console.log("drop", e, " d: ", d);
-    }
-
-    drag
-        .on("start", onStart)
-        .on("drag", onDrag)
-        .on("end", onDrop);
-
-    return drag;
-}
 
 function groupByFingerprintIDs(input) {
    const result = {};
@@ -125,6 +100,7 @@ function main() {
         .enter()
         .append("g")
         .attr("class", ".cell")
+        .attr("id", (d) => { console.log(d); return d.id })
         .call(dragHandler())
 
     const rect = cell
@@ -142,8 +118,6 @@ function main() {
             s.style("fill", "#69b3a2");
         })
 
-    // rect.call(dragHandler())
-
     // Define text
     const text = cell
         .append("text")
@@ -152,9 +126,10 @@ function main() {
         .text((d) => { return d.id; })
 
 
-    d3.forceSimulation(graph.nodes)
+    const force = d3.forceSimulation(graph.nodes)
         .force("link", d3.forceLink()
             .id(function(d) { return d.id; })
+            .distance(50)
             .links(graph.links)
         )
         .force("charge", d3
@@ -166,7 +141,10 @@ function main() {
 
     let initialScale, initialX, initialY;
 
-    // This function is run at each iteration of the force algorithm, updating the nodes position.
+    link.each((d) => {
+        console.log(d)
+    })
+
     function ticked() {
         link
             .attr("x1", function(d) { return d.source.x + 12; })
@@ -177,16 +155,47 @@ function main() {
         node
             .attr("transform", (d) => {
                 return "translate(" + d.x + "," + d.y + ")";
-            });
+            })
 
-        rect
-            .attr("x", (d) => { return d.x })
-            .attr("y", (d) => { return d.y })
-        text
+        cell
             .attr("transform", (d) => {
                 return "translate(" + d.x + "," + d.y + ")";
-            });
+            })
+            .attr("x", (d) => { return d.x })
+            .attr("y", (d) => { return d.y })
     }
+
+    function dragHandler() {
+        const drag = d3.drag();
+
+        function onStart(e, d) {
+            // console.log("start", e, " d: ", d, "parent", d3.select(this.parentNode))
+        }
+
+        function onDrag(e, d) {
+            d.x = e.x
+            d.y = e.y
+            const cell = d3
+                .select(this)
+                .attr("transform", `translate(${e.x}, ${e.y})`)
+                .attr("x", (d) => { return e.x })
+                .attr("y", (d) => { return e.y })
+
+            ticked()
+        }
+
+        function onDrop(e, d) {
+            // console.log("drop", e, " d: ", d);
+        }
+
+        drag
+            .on("start", onStart)
+            .on("drag", onDrag)
+            .on("end", onDrop);
+
+        return drag;
+    }
+
 }
 
 main()
