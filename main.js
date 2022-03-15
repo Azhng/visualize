@@ -59,12 +59,23 @@ function main() {
         .append("svg")
         .attr("width", size.width + margin.left + margin.right)
         .attr("height", size.height + margin.top + margin.bottom)
+        .style("background-color", "#b8b8b8")
+        .call(handleZoom())
+
+    const vis = svg
         .append("g")
-        .attr("transform",
-            `translate(${margin.left}, ${margin.top}) scale(0.7)`);
+        .attr("class", ".root")
+
+   vis
+        .append("rect")
+        .attr("width", size.width + margin.left + margin.right)
+        .attr("height", size.height, + margin.top + margin.bottom)
+        .attr("fill", "#b8b8b8")
+        .attr("class", ".background")
+
 
     // Define end marker.
-    svg
+   vis
         .append("defs")
         .append("marker")
         .attr("id", "arrow")
@@ -78,19 +89,19 @@ function main() {
         .attr("d", "M0,-5L10,0L0,5");
 
     // Define edges.
-    const link = svg
+    const link = vis
         .append("g")
         .attr("class", ".link")
         .selectAll(".link")
         .data(graph.links)
         .enter()
         .append("line")
-        .attr("stroke", "#aaa")
+        .attr("stroke", "#276ac2")
         .attr("marker-end", "url(#arrow)");
 
 
     // Initialize the nodes
-    const node = svg
+    const node = vis
         .append("g")
         .attr("class", ".node")
         .selectAll(".node")
@@ -100,8 +111,8 @@ function main() {
         .enter()
         .append("g")
         .attr("class", ".cell")
-        .attr("id", (d) => { console.log(d); return d.id })
-        .call(dragHandler())
+        .attr("id", (d) => { return d.id })
+        .call(handleDrag())
 
     const rect = cell
         .append("rect")
@@ -129,7 +140,7 @@ function main() {
     const force = d3.forceSimulation(graph.nodes)
         .force("link", d3.forceLink()
             .id(function(d) { return d.id; })
-            .distance(50)
+            .distance(250)
             .links(graph.links)
         )
         .force("charge", d3
@@ -140,10 +151,6 @@ function main() {
         .on("tick", ticked);
 
     let initialScale, initialX, initialY;
-
-    link.each((d) => {
-        console.log(d)
-    })
 
     function ticked() {
         link
@@ -165,7 +172,7 @@ function main() {
             .attr("y", (d) => { return d.y })
     }
 
-    function dragHandler() {
+    function handleDrag() {
         const drag = d3.drag();
 
         function onStart(e, d) {
@@ -194,6 +201,16 @@ function main() {
             .on("end", onDrop);
 
         return drag;
+    }
+
+    function handleZoom() {
+        const zoom = d3.zoom();
+        zoom
+            .on("zoom", function (e) {
+                vis.attr("transform", e.transform)
+            })
+
+        return zoom
     }
 
 }
