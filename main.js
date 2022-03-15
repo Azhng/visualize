@@ -1,5 +1,31 @@
 // const data = {...};
 
+function dragHandler() {
+    const drag = d3.drag();
+
+    function onStart(e, d) {
+        console.log("start", e, " d: ", d, "parent", d3.select(this.parentNode))
+    }
+
+    function onDrag(e, d) {
+        console.log("drag", e, " d: ", d)
+        d3
+            .select(this)
+            .attr("transform", `translate(${e.x - d.x}, ${e.y - d.y})`)
+    }
+
+    function onDrop(e, d) {
+        console.log("drop", e, " d: ", d);
+    }
+
+    drag
+        .on("start", onStart)
+        .on("drag", onDrag)
+        .on("end", onDrop);
+
+    return drag;
+}
+
 function groupByFingerprintIDs(input) {
    const result = {};
 
@@ -76,6 +102,7 @@ function main() {
         .append("svg:path")
         .attr("d", "M0,-5L10,0L0,5");
 
+    // Define edges.
     const link = svg
         .append("g")
         .attr("class", ".link")
@@ -94,39 +121,35 @@ function main() {
         .selectAll(".node")
         .data(graph.nodes)
 
-
-    const rect = node
+    const cell = node
         .enter()
+        .append("g")
+        .attr("class", ".cell")
+        .call(dragHandler())
+
+    const rect = cell
         .append("rect")
-        .attr("width", function (d) { return 170 })
-        .attr("height", () => { return 16 })
+        .attr("width", function (d) { return 210 })
+        .attr("height", () => { return 50 })
         .style("fill", "#69b3a2")
         .attr('stroke', 'black')
+        .on("mouseover", function(d) {
+            const s = d3.select(this);
+            s.style("fill", "#eedd22");
+        })
+        .on("mouseout", function(d) {
+            const s = d3.select(this);
+            s.style("fill", "#69b3a2");
+        })
+
+    // rect.call(dragHandler())
 
     // Define text
-    const text = node
-        .enter()
+    const text = cell
         .append("text")
-        .attr("y", 12)
-        .attr("x", 5)
+        .attr("y", 28)
+        .attr("x", 20)
         .text((d) => { return d.id; })
-
-    // const text = svg
-    //     .append("g")
-    //     .attr("class", "labels")
-    //     .selectAll("g")
-    //     .data(graph.nodes)
-    //     .enter()
-    //     .append("g");
-
-    // text.append("text")
-    //     .attr("x", 14)
-    //     .attr("y", ".31em")
-    //     .style("font-family", "sans-serif")
-    //     .style("font-size", "0.7em")
-    //     .text(function(d) {
-    //         return d.id;
-    //     });
 
 
     d3.forceSimulation(graph.nodes)
@@ -136,10 +159,12 @@ function main() {
         )
         .force("charge", d3
             .forceManyBody()
-            .strength(-850)
+            .strength(-450)
         )
         .force("center", d3.forceCenter(size.width / 2, size.height / 2))
-        .on("end", ticked);
+        .on("tick", ticked);
+
+    let initialScale, initialX, initialY;
 
     // This function is run at each iteration of the force algorithm, updating the nodes position.
     function ticked() {
@@ -150,8 +175,9 @@ function main() {
             .attr("y2", function(d) { return d.target.y + 6; });
 
         node
-            .attr("x", (d) => { console.log(d); return d.x; })
-            .attr("y", (d) => { return d.y; })
+            .attr("transform", (d) => {
+                return "translate(" + d.x + "," + d.y + ")";
+            });
 
         rect
             .attr("x", (d) => { return d.x })
