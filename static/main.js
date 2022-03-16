@@ -2,14 +2,16 @@
 
 
 function groupByFingerprintIDs(input) {
-   const result = {};
+    console.log(input)
+
+    const result = {};
 
    const nodes = {};
    const links = {};
 
    for (const i in input.events) {
-       const blocker = data.events[i]["blockingTxnFingerprintId"];
-       const waiter = data.events[i]["waitingTxnFingerprintId"];
+       const blocker = input.events[i]["blockingTxnFingerprintId"];
+       const waiter = input.events[i]["waitingTxnFingerprintId"];
 
        if (blocker === "0") {
            continue;
@@ -24,8 +26,8 @@ function groupByFingerprintIDs(input) {
            continue;
        }
 
-       nodes[waiter] = {id: waiter};
-       nodes[blocker] = {id: blocker};
+       nodes[waiter] = { id: waiter };
+       nodes[blocker] = {id: blocker };
 
        links[waiter + blocker] = {
            source: waiter,
@@ -51,7 +53,7 @@ const size = {
     height: window.innerHeight - margin.top - margin.bottom,
 };
 
-function main() {
+function main(data) {
     const graph = groupByFingerprintIDs(data);
     console.log(graph);
 
@@ -115,6 +117,10 @@ function main() {
         .call(handleDrag())
 
     const rect = cell
+        .append("a")
+        .attr("xlink:href", (d) => {
+            return `http://localhost:8080/#/transaction/1647399600/${d.id}`
+        })
         .append("rect")
         .attr("width", function (d) { return 210 })
         .attr("height", () => { return 50 })
@@ -134,6 +140,7 @@ function main() {
         .append("text")
         .attr("y", 28)
         .attr("x", 20)
+        .style("pointer-events", "none")
         .text((d) => { return d.id; })
 
 
@@ -149,8 +156,6 @@ function main() {
         )
         .force("center", d3.forceCenter(size.width / 2, size.height / 2))
         .on("tick", ticked);
-
-    let initialScale, initialX, initialY;
 
     function ticked() {
         link
@@ -215,4 +220,6 @@ function main() {
 
 }
 
-main()
+getContentionEvents((data) => {
+    main(data)
+})
