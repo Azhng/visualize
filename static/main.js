@@ -2,8 +2,6 @@
 
 
 function groupByFingerprintIDs(input) {
-    console.log(input)
-
     const result = {};
 
    const nodes = {};
@@ -22,9 +20,9 @@ function groupByFingerprintIDs(input) {
        }
 
        // Disallow self reference for now.
-       if (blocker === waiter) {
-           continue;
-       }
+       // if (blocker === waiter) {
+       //     continue;
+       // }
 
        nodes[waiter] = { id: waiter };
        nodes[blocker] = {id: blocker };
@@ -82,11 +80,12 @@ function main(data) {
         .append("marker")
         .attr("id", "arrow")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 20)
+        .attr("refX", 10)
         .attr("refY", 0)
-        .attr("markerWidth", 8)
-        .attr("markerHeight", 8)
-        .attr("orient", "auto")
+        .attr("markerWidth", 16)
+        .attr("markerHeight", 16)
+        // .attr("orient", "auto")
+        .attr("orient", "auto-start-reverse")
         .append("svg:path")
         .attr("d", "M0,-5L10,0L0,5");
 
@@ -97,7 +96,8 @@ function main(data) {
         .selectAll(".link")
         .data(graph.links)
         .enter()
-        .append("line")
+        .append("path")
+        .style("fill","none")
         .attr("stroke", "#276ac2")
         .attr("marker-end", "url(#arrow)");
 
@@ -122,7 +122,7 @@ function main(data) {
             return `http://localhost:8080/#/transaction/1647399600/${d.id}`
         })
         .append("rect")
-        .attr("width", function (d) { return 210 })
+        .attr("width", function (d) { return 330 })
         .attr("height", () => { return 50 })
         .style("fill", "#69b3a2")
         .attr('stroke', 'black')
@@ -141,7 +141,7 @@ function main(data) {
         .attr("y", 28)
         .attr("x", 20)
         .style("pointer-events", "none")
-        .text((d) => { return d.id; })
+        .text((d) => { return `TxnFingerprintID: ${d.id}` })
 
 
     const force = d3.forceSimulation(graph.nodes)
@@ -158,11 +158,49 @@ function main(data) {
         .on("tick", ticked);
 
     function ticked() {
-        link
-            .attr("x1", function(d) { return d.source.x + 12; })
-            .attr("y1", function(d) { return d.source.y + 6; })
-            .attr("x2", function(d) { return d.target.x + 12; })
-            .attr("y2", function(d) { return d.target.y + 6; });
+        // https://stackoverflow.com/questions/49491992/d3-self-linking-edges.
+        link.attr("d", function(d) {
+            let x1 = d.source.x,
+                y1 = d.source.y,
+                x2 = d.target.x + 150,
+                y2 = d.target.y,
+                dx = x2 - x1,
+                dy = y2 - y1,
+                dr = Math.sqrt(dx * dx + dy * dy),
+
+                // Defaults for normal edge.
+                drx = dr,
+                dry = dr,
+                xRotation = 0, // degrees
+                largeArc = 0, // 1 or 0
+                sweep = 1; // 1 or 0
+
+            // Self edge.
+            if (d.source.x === d.target.x && d.source.y === d.target.y) {
+                // Fiddle with this angle to get loop oriented.
+                xRotation = -45;
+
+                // Needs to be 1.
+                largeArc = 1;
+
+                // Change sweep to change orientation of loop.
+                sweep = 0;
+
+                // Make drx and dry different to get an ellipse
+                // instead of a circle.
+                drx = 25;
+                dry = 15;
+
+                // Reposition the start and the end of the ellipse.
+                x1 = d.source.x + 50;
+                y1 = d.source.y;
+                x2 = d.target.x;
+                y2 = d.target.y + 5;
+            }
+
+            return "M" + x1 + "," + y1 + "A" + drx + "," + dry + " " + xRotation + "," + largeArc + "," + sweep + " " + x2 + "," + y2;
+        });
+
 
         node
             .attr("transform", (d) => {
