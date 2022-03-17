@@ -3,33 +3,33 @@ const translationAPI = "/getAggTs"
 const statementAPI = "api/_status/statements"
 
 async function getStatements() {
-    const resp = await fetch(statementAPI, {mode: 'cors'});
+    const resp = await fetch(statementAPI, { mode: 'cors' });
     const data = await resp.json();
 
-    var stmtLookup = {};
+    var queryLookup = {};
     var txns = data["transactions"];
+    var stmts = data["statements"];
 
     txns.forEach(txn => {
-        var stmts = [];
+        var queries = [];
         var txnFingerprintId = txn["statsData"]["transactionFingerprintId"];
         var stmtFingerprintIds = txn["statsData"]["statementFingerprintIds"];
 
         stmtFingerprintIds.forEach(stmtFingerprintId => {
-            var query = getStatementSQLFromStmtFingerprintId(data, stmtFingerprintId)
-            stmts.push(query);
+            var query = getStatementSQLFromStmtFingerprintId(stmts, stmtFingerprintId)
+            queries.push(query);
         })
-        
-        stmtLookup[txnFingerprintId] = stmts;
+
+        queryLookup[txnFingerprintId] = queries;
     })
 
-    return stmtLookup;
+    return queryLookup;
 }
 
-function getStatementSQLFromStmtFingerprintId(data, stmtFingerprintId) {
-    var stmts = data["statements"];
+function getStatementSQLFromStmtFingerprintId(stmts, stmtFingerprintId) {
     for (var i = 0; i < stmts.length; i++) {
         var stmt = stmts[i];
-        
+
         if (stmt["id"] === stmtFingerprintId) {
             return stmt["key"]["keyData"]["query"];
         }
@@ -38,13 +38,13 @@ function getStatementSQLFromStmtFingerprintId(data, stmtFingerprintId) {
 
 async function getContentionEvents(main) {
     try {
-        const resp = await fetch(contentionEventAPI, {mode: 'cors'})
+        const resp = await fetch(contentionEventAPI, { mode: 'cors' })
         const data = await resp.json()
         const lookupTable = await getAggTsForTxnFingerprintIDs(data)
-        const stmtLookup = await getStatements();
-        main(data, lookupTable, stmtLookup)
-    } catch(e) {
-        alert(e);  
+        const queryLookup = await getStatements();
+        main(data, lookupTable, queryLookup)
+    } catch (e) {
+        alert(e);
     }
 }
 
@@ -71,7 +71,7 @@ async function getAggTsForTxnFingerprintIDs(contentionEventPayload) {
             lookupTable[m[0]] = m[1]
         })
         return lookupTable
-    } catch(e) {
+    } catch (e) {
         alert(e)
     }
 }

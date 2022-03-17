@@ -1,4 +1,4 @@
-function groupByFingerprintIDs(input, aggLookup, stmtLookup) {
+function groupByFingerprintIDs(input, aggLookup, queryLookup) {
     const result = {};
 
    const nodes = {};
@@ -19,12 +19,12 @@ function groupByFingerprintIDs(input, aggLookup, stmtLookup) {
         nodes[waiter] = {
             id:    waiter,
             aggTs: aggLookup[waiter],
-            sql: stmtLookup[waiter][0],
+            sql: queryLookup[waiter][0],
         };
         nodes[blocker] = {
             id: blocker,
             aggTs: aggLookup[blocker],
-            sql: stmtLookup[blocker][0],
+            sql: queryLookup[blocker][0],
         };
 
 
@@ -52,8 +52,8 @@ const size = {
     height: window.innerHeight - margin.top - margin.bottom,
 };
 
-function main(data, aggLookup, stmtLookup) {
-    const graph = groupByFingerprintIDs(data, aggLookup, stmtLookup);
+function main(data, aggLookup, queryLookup) {
+    const graph = groupByFingerprintIDs(data, aggLookup, queryLookup);
     console.log(graph);
 
     const svg = d3.select("#my_dataviz")
@@ -265,6 +265,6 @@ function main(data, aggLookup, stmtLookup) {
 
 }
 
-getContentionEvents((data, aggTsLookup, stmtLookup) => {
-    main(data, aggTsLookup, stmtLookup)
+getContentionEvents((data, aggTsLookup, queryLookup) => {
+    main(data, aggTsLookup, queryLookup)
 })
