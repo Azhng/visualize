@@ -1,7 +1,4 @@
-// const data = {...};
-
-
-function groupByFingerprintIDs(input) {
+function groupByFingerprintIDs(input, aggLookup) {
     const result = {};
 
    const nodes = {};
@@ -19,13 +16,14 @@ function groupByFingerprintIDs(input) {
            continue;
        }
 
-       // Disallow self reference for now.
-       // if (blocker === waiter) {
-       //     continue;
-       // }
-
-       nodes[waiter] = { id: waiter };
-       nodes[blocker] = {id: blocker };
+       nodes[waiter] = {
+           id:    waiter,
+           aggTs: aggLookup[waiter],
+       };
+       nodes[blocker] = {
+           id: blocker,
+           aggTs: aggLookup[blocker],
+       };
 
        links[waiter + blocker] = {
            source: waiter,
@@ -51,8 +49,8 @@ const size = {
     height: window.innerHeight - margin.top - margin.bottom,
 };
 
-function main(data) {
-    const graph = groupByFingerprintIDs(data);
+function main(data, aggLookup) {
+    const graph = groupByFingerprintIDs(data, aggLookup);
     console.log(graph);
 
     const svg = d3.select("#my_dataviz")
@@ -119,7 +117,7 @@ function main(data) {
     const rect = cell
         .append("a")
         .attr("xlink:href", (d) => {
-            return `http://localhost:8080/#/transaction/1647399600/${d.id}`
+            return `http://localhost:8080/#/transaction/${d.aggTs}/${d.id}`
         })
         .append("rect")
         .attr("width", function (d) { return 330 })
@@ -258,6 +256,6 @@ function main(data) {
 
 }
 
-getContentionEvents((data) => {
-    main(data)
+getContentionEvents((data, aggTsLookup) => {
+    main(data, aggTsLookup)
 })
