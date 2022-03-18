@@ -1,4 +1,4 @@
-from flask import Flask, Response, request
+from flask import Flask, render_template, Response, request
 import requests
 import psycopg2
 import struct
@@ -51,6 +51,10 @@ def get_agg_ts():
         return resp
     return resp
 
+
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # run the application
 if __name__ == "__main__":

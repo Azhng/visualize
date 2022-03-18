@@ -1,34 +1,37 @@
-function groupByFingerprintIDs(input, aggLookup) {
+function groupByFingerprintIDs(input, aggLookup, queryLookup) {
     const result = {};
 
    const nodes = {};
    const links = {};
 
    for (const i in input.events) {
-       const blocker = input.events[i]["blockingTxnFingerprintId"];
-       const waiter = input.events[i]["waitingTxnFingerprintId"];
+        const blocker = input.events[i]["blockingTxnFingerprintId"];
+        const waiter = input.events[i]["waitingTxnFingerprintId"];
 
-       if (blocker === "0") {
-           continue;
-       }
+        if (blocker === "0") {
+            continue;
+        }
 
-       if (waiter === "0") {
-           continue;
-       }
+        if (waiter === "0") {
+            continue;
+        }
 
-       nodes[waiter] = {
-           id:    waiter,
-           aggTs: aggLookup[waiter],
-       };
-       nodes[blocker] = {
-           id: blocker,
-           aggTs: aggLookup[blocker],
-       };
+        nodes[waiter] = {
+            id:    waiter,
+            aggTs: aggLookup[waiter],
+            sql: queryLookup[waiter][0],
+        };
+        nodes[blocker] = {
+            id: blocker,
+            aggTs: aggLookup[blocker],
+            sql: queryLookup[blocker][0],
+        };
 
-       links[waiter + blocker] = {
-           source: waiter,
-           target: blocker,
-       };
+
+        links[waiter + blocker] = {
+            source: waiter,
+            target: blocker,
+        };
    }
 
    result.nodes = Object.values(nodes);
@@ -49,8 +52,8 @@ const size = {
     height: window.innerHeight - margin.top - margin.bottom,
 };
 
-function main(data, aggLookup) {
-    const graph = groupByFingerprintIDs(data, aggLookup);
+function main(data, aggLookup, queryLookup) {
+    const graph = groupByFingerprintIDs(data, aggLookup, queryLookup);
     console.log(graph);
 
     const svg = d3.select("#my_dataviz")
@@ -120,8 +123,8 @@ function main(data, aggLookup) {
             return `http://localhost:8080/#/transaction/${d.aggTs}/${d.id}`
         })
         .append("rect")
-        .attr("width", function (d) { return 330 })
-        .attr("height", () => { return 50 })
+        .attr("width", function (d) { return 450 })
+        .attr("height", () => { return 80 })
         .style("fill", "#69b3a2")
         .attr('stroke', 'black')
         .on("mouseover", function(d) {
@@ -131,16 +134,22 @@ function main(data, aggLookup) {
         .on("mouseout", function(d) {
             const s = d3.select(this);
             s.style("fill", "#69b3a2");
-        })
+        })        
 
     // Define text
     const text = cell
         .append("text")
         .attr("y", 28)
-        .attr("x", 20)
+        .attr("x", 10)
         .style("pointer-events", "none")
-        .text((d) => { return `TxnFingerprintID: ${d.id}` })
-
+        .text((d) => { return `TxnFingerprintID: ${d.id}`})
+    
+    const sqlText = cell
+        .append("text")
+        .attr("y", 60)
+        .attr("x", 10)
+        .style("pointer-events", "none")
+        .text((d) => { return `SQL: ${d.sql}` }) 
 
     const force = d3.forceSimulation(graph.nodes)
         .force("link", d3.forceLink()
@@ -256,6 +265,6 @@ function main(data, aggLookup) {
 
 }
 
-getContentionEvents((data, aggTsLookup) => {
-    main(data, aggTsLookup)
+getContentionEvents((data, aggTsLookup, queryLookup) => {
+    main(data, aggTsLookup, queryLookup)
 })
