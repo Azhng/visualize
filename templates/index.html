@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3.v6.js"></script>
 <script src="api.js"></script>
 <script src="payload.js"></script>
 <script src="graph.js"></script>
@@ -19,13 +19,19 @@
 
     <h1>Cluster Transaction Contention Event Visualizer</h1>
 
-    <div id="graphs">
-
+    <div id="pattern">
+        <h2>Transaction Contention Patterns</h2>
+        <img id="loading-del-me-pattern" src="loading.gif" alt="Loading" width="150" height="150">
+        <div id="my_dataviz"></div>
     </div>
 
+    <div id="active">
+        <h2>Active Transaction Contentions</h2>
+        <img id="loading-del-me-active" src="loading.gif" alt="Loading" width="150" height="150">
+        <div id="graphs"></div>
+    </div>
 
     <script src="main.js"></script>
-
 </body>
 
 </html>

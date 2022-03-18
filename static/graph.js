@@ -108,10 +108,12 @@ const populateDAG = (data) => {
     let undirectedGraph = new Graph("undirected");
 
     for (let i in Object(data.events)) {
-        waitingID = data.events[i]["waitingTxnFingerprintId"];
-        blockingID = data.events[i]["blockingTxnFingerprintId"];
-        
-        if (waitingID === "0" || blockingID == "0") {
+        let waitingFingerprintID = data.events[i]["waitingTxnFingerprintId"];
+        let blockingFingerprintID = data.events[i]["blockingTxnFingerprintId"];
+        let waitingID = data.events[i]["waitingTxnId"];
+        let blockingID = data.events[i]["blockingEvent"]["txnMeta"]["id"];
+
+        if (waitingFingerprintID !== "0" || blockingFingerprintID !== "0") {
             continue;
         }
 
@@ -121,6 +123,6 @@ const populateDAG = (data) => {
     }
 
     wcc = undirectedGraph.getWeaklyConnectedComponents();
-    
+
     return [directedGraph, wcc];
 }

@@ -43,7 +43,8 @@ async function getContentionEvents(main) {
         const queryLookup = await getStatements();
         main(data, lookupTable, queryLookup)
     } catch (e) {
-        alert(e);
+        alert("ugh, awkward, we borked something here");
+        console.error(e)
     }
 }
 
