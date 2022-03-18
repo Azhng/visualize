@@ -19,4 +19,6 @@ Visualizer will be available on http://127.0.0.1:5000.
 
 Using YCSB-A workload
 
-![screenshot](alt-visualizer.gif)
+
+https://user-images.githubusercontent.com/9267198/159096848-1e745aa1-2ec8-4599-86c2-7fa3543c984a.mov
+
