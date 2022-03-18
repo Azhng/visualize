@@ -5,7 +5,6 @@ const statementAPI = "api/_status/statements"
 async function getStatements() {
     const resp = await fetch(statementAPI, { mode: 'cors' });
     const data = await resp.json();
-
     var queryLookup = {};
     var txns = data["transactions"];
     var stmts = data["statements"];

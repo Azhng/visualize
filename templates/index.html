@@ -5,17 +5,27 @@
     <meta charset="utf-8" />
     <title>Cluster Transaction Contention Event Visualizer</title>
     <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
-<script src="https://d3js.org/d3.v6.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="api.js"></script>
 <script src="payload.js"></script>
+<script src="graph.js"></script>
+<script src="dagree-d3.js"></script>
 
-<body scroll="no" style="overflow: hidden">
-    <h1>Transaction Contention Patterns</h1>
-    <div id="my_dataviz"></div>
+
+<body>
+
+    <h1>Cluster Transaction Contention Event Visualizer</h1>
+
+    <div id="graphs">
+
+    </div>
+
+
+    <script src="main.js"></script>
+
 </body>
-
-<script src="main.js"></script>
 
 </html>
