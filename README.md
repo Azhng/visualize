@@ -19,4 +19,4 @@ Visualizer will be available on http://127.0.0.1:5000.
 
 Using YCSB-A workload
 
-![screenshot](https://github.com/Azhng/visualize/blob/master/screenshot.png?raw=true)
+![screenshot](alt-visualizer.gif)
